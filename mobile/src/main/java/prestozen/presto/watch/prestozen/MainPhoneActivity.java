@@ -20,7 +20,9 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.mapzen.pelias.BoundingBox;
 import com.mapzen.pelias.Pelias;
+import com.mapzen.pelias.PeliasLocationProvider;
 import com.mapzen.pelias.gson.Feature;
 import com.mapzen.pelias.gson.Result;
 import com.mapzen.pelias.widget.PeliasSearchView;
@@ -36,7 +38,10 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class MainPhoneActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainPhoneActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        PeliasLocationProvider {
 
     private static final String TAG = "MainPhoneActivity";
     private PeliasSearchView searchView;
@@ -50,6 +55,7 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
         setContentView(R.layout.activity_main_phone);
         ViewGroup layout = (ViewGroup) findViewById(R.id.main_relative_layout);
         Pelias pelias = Pelias.getPelias();
+        pelias.setLocationProvider(this);
         pelias.setApiKey("search-CO7N6XU");
         searchView = new PeliasSearchView(this);
         searchView.setPelias(pelias);
@@ -57,6 +63,7 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
                 new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         layout.addView(searchView, params);
         searchView.setCallback(new Callback<Result>() {
             @Override
@@ -68,8 +75,8 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
                     //TODO: reset searchView
                 } else {
                     Feature f = features.get(0);
-                    double lat = f.geometry.coordinates.get(0);
-                    double lng = f.geometry.coordinates.get(1);
+                    double lat = f.geometry.coordinates.get(1);
+                    double lng = f.geometry.coordinates.get(0);
 
                     double[] start = {myLoc.getLatitude(), myLoc.getLongitude()};
                     double[] dest = {lat, lng};
@@ -151,5 +158,29 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
         Toast.makeText(MainPhoneActivity.this,
                 "Unable to get current location, connection failed", Toast.LENGTH_LONG).show();
         searchView.setEnabled(false);
+    }
+
+    @Override
+    public double getLat() {
+        if(myLoc != null) {
+            return myLoc.getLatitude();
+        }
+        return 0;
+    }
+
+    @Override
+    public double getLon() {
+        if(myLoc != null) {
+            return myLoc.getLongitude();
+        }
+        return 0;
+    }
+
+    @Override
+    public BoundingBox getBoundingBox() {
+        BoundingBox ret = new BoundingBox(myLoc.getLatitude()-0.5d,
+                            myLoc.getLongitude()-0.5d, myLoc.getLatitude() + 0.5d,
+                            myLoc.getLongitude() + 0.5d);
+        return ret;
     }
 }
