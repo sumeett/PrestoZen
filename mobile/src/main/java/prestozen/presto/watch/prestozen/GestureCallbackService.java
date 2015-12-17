@@ -2,7 +2,12 @@ package prestozen.presto.watch.prestozen;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 import watch.nudge.phonegesturelibrary.AbstractPhoneGestureService;
 
@@ -11,19 +16,57 @@ import watch.nudge.phonegesturelibrary.AbstractPhoneGestureService;
  */
 public class GestureCallbackService extends AbstractPhoneGestureService {
 
+
+    private ArrayList<String> directions = null;
+    private TextToSpeech tts;
+    private boolean ttsReady = false;
+    private int currDirIdx = 0;
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if(tts == null) {
+            tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    if(status == TextToSpeech.SUCCESS) {
+                        ttsReady = true;
+                    }
+                }
+            });
+            tts.setLanguage(Locale.US);
+        }
+        startGestureOnWatch(intent);
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void onDestroy() {
+        if(tts != null)
+            tts.shutdown();
+    }
+
     @Override
     public void onSnap() {
-        //TODO: remove snap from the subscriptions, we don't really need it.
+        onFlick();
     }
 
     @Override
     public void onFlick() {
-        //TODO: Resume the directions per normal
+        currDirIdx = 0;
     }
 
     @Override
     public void onTwist() {
-        //Read out the next direction
+        if(!ttsReady) {
+            Toast.makeText(this, "Text To Speach not ready, please retry later", Toast.LENGTH_LONG).show();
+            currDirIdx = 0;
+            return;
+        }
+        if(tts.isSpeaking())
+            return;
+        String currentDirString = directions.get(currDirIdx);
+        tts.speak(currentDirString, TextToSpeech.QUEUE_FLUSH, null);
     }
 
     @Override
