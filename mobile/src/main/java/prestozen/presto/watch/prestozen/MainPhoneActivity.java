@@ -19,10 +19,16 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.mapzen.pelias.Pelias;
 import com.mapzen.pelias.gson.Feature;
 import com.mapzen.pelias.gson.Result;
 import com.mapzen.pelias.widget.PeliasSearchView;
+import com.mapzen.valhalla.Instruction;
+import com.mapzen.valhalla.Route;
+import com.mapzen.valhalla.RouteCallback;
+import com.mapzen.valhalla.ValhallaRouter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit.Callback;
@@ -42,7 +48,11 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_phone);
         ViewGroup layout = (ViewGroup) findViewById(R.id.main_relative_layout);
+        Pelias pelias = Pelias.getPelias();
+        pelias.setApiKey("search-CO7N6XU");
         searchView = new PeliasSearchView(this);
+        searchView.setPelias(pelias);
+        //TODO: Set API key for Pelias
         RelativeLayout.LayoutParams params =
                 new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -61,7 +71,31 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
                     double lat = f.geometry.coordinates.get(0);
                     double lng = f.geometry.coordinates.get(1);
 
+                    double[] start = {myLoc.getLatitude(), myLoc.getLongitude()};
+                    double[] dest = {lat, lng};
 
+                    ValhallaRouter router = new ValhallaRouter();
+                    router.setDriving().
+                            setLocation(start).
+                            setLocation(dest).
+                            setApiKey("valhalla-MQoLbSQ").setCallback(new RouteCallback() {
+                        @Override
+                        public void success(Route route) {
+                            List<Instruction> instructions = route.getRouteInstructions();
+                            ArrayList<String> dirs  = new ArrayList<String>(instructions.size());
+                            for(Instruction instruction: instructions) {
+                                dirs.add(instruction.getVerbalPreTransitionInstruction());
+                            }
+                            //TODO: send this to Gesture Service using a local broadcast
+                        }
+
+                        @Override
+                        public void failure(int i) {
+                            Toast.makeText(MainPhoneActivity.this,
+                                    "Call to router failed", Toast.LENGTH_LONG).show();
+
+                        }
+                    }).fetch();
                 }
             }
 
