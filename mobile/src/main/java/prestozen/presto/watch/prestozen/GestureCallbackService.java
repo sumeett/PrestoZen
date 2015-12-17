@@ -1,9 +1,13 @@
 package prestozen.presto.watch.prestozen;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -21,7 +25,7 @@ public class GestureCallbackService extends AbstractPhoneGestureService {
     private TextToSpeech tts;
     private boolean ttsReady = false;
     private int currDirIdx = 0;
-
+    BroadcastReceiver directionsReceiver;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -36,6 +40,18 @@ public class GestureCallbackService extends AbstractPhoneGestureService {
             });
             tts.setLanguage(Locale.US);
         }
+        if(directionsReceiver == null) {
+            directionsReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    directions = intent.getStringArrayListExtra("prestozen.presto.watch.prestozen.INSTRUCTIONS");
+                    currDirIdx = 0;
+                }
+            };
+            IntentFilter filter = new IntentFilter("prestozen.presto.watch.prestozen.DIRS_ACTION");
+            LocalBroadcastManager.getInstance(this).registerReceiver(directionsReceiver, filter );
+        }
+
         startGestureOnWatch(intent);
         return START_REDELIVER_INTENT;
     }

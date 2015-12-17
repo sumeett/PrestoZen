@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -52,7 +53,6 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
         pelias.setApiKey("search-CO7N6XU");
         searchView = new PeliasSearchView(this);
         searchView.setPelias(pelias);
-        //TODO: Set API key for Pelias
         RelativeLayout.LayoutParams params =
                 new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -86,7 +86,9 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
                             for (Instruction instruction : instructions) {
                                 dirs.add(instruction.getVerbalPreTransitionInstruction());
                             }
-                            //TODO: send this to Gesture Service using a local broadcast
+                            Intent intent = new Intent("prestozen.presto.watch.prestozen.DIRS_ACTION");
+                            intent.putStringArrayListExtra("prestozen.presto.watch.prestozen.INSTRUCTIONS", dirs);
+                            LocalBroadcastManager.getInstance(MainPhoneActivity.this).sendBroadcast(intent);
                         }
 
                         @Override
