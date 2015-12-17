@@ -82,8 +82,8 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
                         @Override
                         public void success(Route route) {
                             List<Instruction> instructions = route.getRouteInstructions();
-                            ArrayList<String> dirs  = new ArrayList<String>(instructions.size());
-                            for(Instruction instruction: instructions) {
+                            ArrayList<String> dirs = new ArrayList<String>(instructions.size());
+                            for (Instruction instruction : instructions) {
                                 dirs.add(instruction.getVerbalPreTransitionInstruction());
                             }
                             //TODO: send this to Gesture Service using a local broadcast
@@ -112,17 +112,20 @@ public class MainPhoneActivity extends AppCompatActivity implements GoogleApiCli
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
     }
 
     protected void onStart() {
         googleApiClient.connect();
         super.onStart();
+        Intent intent = new Intent(this, GestureCallbackService.class);
+        startService(intent);
     }
 
     protected void onStop() {
         googleApiClient.disconnect();
         super.onStop();
+        Intent intent = new Intent(this, GestureCallbackService.class);
+        stopService(intent);
     }
 
     @Override
