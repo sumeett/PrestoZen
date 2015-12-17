@@ -19,6 +19,12 @@ android {
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     wearApp project(':wear')
@@ -26,4 +32,12 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.google.android.gms:play-services:7.8.0'
     compile 'watch.nudge.phonegesturelibrary:phone-gest-lib:0.8.4'
+
+    compile('com.mapzen:on-the-road:0.8-SNAPSHOT') {
+        exclude group: 'org.apache.commons', module: 'commons-io'
+    }
+
+    compile('com.mapzen.android:pelias-android-sdk:0.7-SNAPSHOT') {
+        exclude group: 'javax.annotation:javax', module: 'javax.annotation-api'
+    }
 }
