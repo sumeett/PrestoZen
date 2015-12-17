@@ -1,9 +1,15 @@
 package prestozen.presto.watch.prestozen;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 public class MainPhoneActivity extends AppCompatActivity {
 
@@ -11,27 +17,28 @@ public class MainPhoneActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_phone);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_phone, menu);
-        return true;
-    }
+        Button goButton = (Button)findViewById(R.id.go_button);
+        goButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText endAddTxt = (EditText)findViewById(R.id.end_address_text);
+                String endAddress = endAddTxt.getText().toString();
+                if(endAddress == null || endAddress.equals("")) {
+                    AlertDialog alertDialog = new AlertDialog.Builder(MainPhoneActivity.this).create();
+                    alertDialog.setTitle("Missing End Address");
+                    alertDialog.setMessage("An End address is needed to begin routing");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+                        }
+                    });
+                    alertDialog.show();
+                }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+                //////OK, we have a valid address, let's do some routing....
 
-        return super.onOptionsItemSelected(item);
+            }
+        });
     }
 }
