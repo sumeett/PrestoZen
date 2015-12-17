@@ -83,6 +83,7 @@ public class GestureCallbackService extends AbstractPhoneGestureService {
             return;
         String currentDirString = directions.get(currDirIdx);
         tts.speak(currentDirString, TextToSpeech.QUEUE_FLUSH, null);
+        currDirIdx++;
     }
 
     @Override
