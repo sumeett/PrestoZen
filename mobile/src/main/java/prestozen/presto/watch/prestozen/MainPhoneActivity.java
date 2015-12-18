@@ -68,11 +68,11 @@ public class MainPhoneActivity extends AppCompatActivity implements
         searchView.setCallback(new Callback<Result>() {
             @Override
             public void success(Result result, Response response) {
+                searchView.setQuery("", false);
                 List<Feature> features = result.getFeatures();
                 if (features == null || features.size() < 1) {
                     Toast.makeText(MainPhoneActivity.this,
                             "No lat, lng found for address", Toast.LENGTH_LONG).show();
-                    //TODO: reset searchView
                 } else {
                     Feature f = features.get(0);
                     double lat = f.geometry.coordinates.get(1);
@@ -179,7 +179,7 @@ public class MainPhoneActivity extends AppCompatActivity implements
     @Override
     public BoundingBox getBoundingBox() {
         BoundingBox ret = new BoundingBox(myLoc.getLatitude()-0.5d,
-                            myLoc.getLongitude()-0.5d, myLoc.getLatitude() + 0.5d,
+                myLoc.getLongitude()-0.5d, myLoc.getLatitude() + 0.5d,
                             myLoc.getLongitude() + 0.5d);
         return ret;
     }
