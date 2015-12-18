@@ -68,7 +68,6 @@ public class MainPhoneActivity extends AppCompatActivity implements
         searchView.setCallback(new Callback<Result>() {
             @Override
             public void success(Result result, Response response) {
-                searchView.setQuery("", false);
                 List<Feature> features = result.getFeatures();
                 if (features == null || features.size() < 1) {
                     Toast.makeText(MainPhoneActivity.this,
@@ -88,14 +87,16 @@ public class MainPhoneActivity extends AppCompatActivity implements
                             setApiKey("valhalla-MQoLbSQ").setCallback(new RouteCallback() {
                         @Override
                         public void success(Route route) {
+                            searchView.setQuery("", false);//reset the query text box
                             List<Instruction> instructions = route.getRouteInstructions();
                             ArrayList<String> dirs = new ArrayList<String>(instructions.size());
                             for (Instruction instruction : instructions) {
                                 dirs.add(instruction.getVerbalPreTransitionInstruction());
                             }
-                            Intent intent = new Intent("prestozen.presto.watch.prestozen.DIRS_ACTION");
-                            intent.putStringArrayListExtra("prestozen.presto.watch.prestozen.INSTRUCTIONS", dirs);
-                            LocalBroadcastManager.getInstance(MainPhoneActivity.this).sendBroadcast(intent);
+
+                            Intent dirsActivity = new Intent(MainPhoneActivity.this, DirectionsTableActivity.class);
+                            dirsActivity.putStringArrayListExtra("prestozen.presto.watch.prestozen.DIRECTIONS", dirs);
+                            startActivity(dirsActivity);
                         }
 
                         @Override
@@ -121,18 +122,15 @@ public class MainPhoneActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-    }
-
-    protected void onStart() {
         googleApiClient.connect();
-        super.onStart();
         Intent intent = new Intent(this, GestureCallbackService.class);
         startService(intent);
     }
 
-    protected void onStop() {
+    @Override
+    protected void onDestroy() {
         googleApiClient.disconnect();
-        super.onStop();
+        super.onDestroy();
         Intent intent = new Intent(this, GestureCallbackService.class);
         stopService(intent);
     }
